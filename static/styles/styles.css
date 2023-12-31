@@ -1,0 +1,30 @@
+#join, #create, #heading, #send-btn, .self-message-item {
+    background: var(--bs-indigo);
+    color: var(--bs-white);
+}
+
+#room-main {
+    background: var(--bs-secondary-bg);
+    height: 100vh;
+}
+
+#room-messages-box {
+    background: var(--bs-tertiary-bg);
+}
+
+.self-message-item {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.peer-message-item {
+    background: var(--bs-secondary-bg);
+}
+
+#room-code, #room-code-cb {
+    color: var(--bs-indigo);
+}
+
+#room-code:hover {
+    color: var(--bs-white);
+}

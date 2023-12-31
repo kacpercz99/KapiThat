@@ -1,0 +1,130 @@
+{% extends 'base.html' %} {% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col col-xl-3 d-none d-xl-block"></div>
+            <div class="col col-xs-12 col-xl-6" id="room-main">
+                <div class="row">
+                    <div class="col p-2" id="heading">
+                        <h1 class="text-center">KapiThat</h1>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col text-start p-3">
+                        <h2>Room Code: <span id="room-code" data-toggle="popover" data-content="Click to copy">{{ room }}</span></h2>
+                        <a class="btn btn-danger mb-2" href="/" id="leave-chat-btn">Leave the room</a>
+                        <hr class="mb-2">
+                    </div>
+                </div>
+                <div class="row m-1 rounded-4 p-1" id="room-messages-box">
+                    <div class="col-12 overflow-auto" id="messages"
+                         style="height: calc(100vh - 350px);overflow-x: hidden; max-height: calc(100vh - 350px);">
+
+                    </div>
+                    <div class="col col-xl-2 d-none d-xl-block"></div>
+                    <div class="col col-xs-12 col-xl-8">
+                        <div class="input-group mb-2">
+                            <input class="form-control" type="text" id="message-input" placeholder="Enter your message">
+                            <button class="btn" type="submit" id="send-btn" onclick="sendMessage()">Send
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col col-xl-2 d-none d-xl-block"></div>
+                </div>
+            </div>
+            <div class="col col-xl-3 d-none d-xl-block"></div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+                integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"
+                integrity="sha512-42PE0rd+wZ2hNXftlM78BSehIGzezNeQuzihiBCvUEB3CVxHvsShF86wBWwQORNxNINlBPuq7rG4WWhNiTVHFg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script type="text/javascript" defer>
+            var socketio = io();
+
+            function formatMessageDate(date) {
+                const userLocale = navigator.language
+                moment.locale(userLocale)
+
+                const currentDate = moment();
+                const messageDate = moment(date);
+
+                if (currentDate.isSame(messageDate, 'day')) {
+                    if (moment.localeData().longDateFormat('LT').includes('A')) {
+                        return messageDate.format('LT');
+                    } else {
+                        return messageDate.format('HH:mm');
+                    }
+                } else {
+                    return messageDate.format('LL')
+                }
+            }
+
+            function createChatItem(message, sender) {
+                var messages = $("#messages");
+                var senderIsUser = "{{user}}" === sender;
+                var content = `
+                    <div class="row p-1 ${senderIsUser ? "justify-content-end" : "justify-content-start"}">
+                        <div class="col-auto rounded-4 text-break ${senderIsUser ? "self-message-item" : "peer-message-item"}">
+                            <p class="mb-0">
+                                ${(senderIsUser || sender === "") ? "" : `<strong>${sender}</strong><br>`}
+                                ${message}<br>
+                                <small>${formatMessageDate(new Date())}</small>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                messages.append(content);
+                messages.animate({scrollTop: messages.prop("scrollHeight")}, 300);
+            }
+
+            function sendMessage() {
+                var msgInput = document.getElementById("message-input")
+                if (msgInput.value === "") return;
+                var msg = msgInput.value;
+                socketio.emit("message", {message: msg});
+                msgInput.value = "";
+            }
+
+            $(document).ready(function () {
+                socketio.on("message", function (message) {
+                    createChatItem(message.message, message.sender)
+                });
+
+                $('#send-btn').on("click", function () {
+                    sendMessage();
+                });
+
+                $("#message-input").keydown(function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault();
+                        sendMessage();
+                    }
+                });
+
+                $("#room-code").popover({
+                    content: "Room code copied!",
+                    trigger: "manual"
+                });
+
+                $("#room-code").click(function () {
+                    var roomCode = $("#room-code").text();
+                    navigator.clipboard.writeText(roomCode)
+                        .then(function () {
+                            $("#room-code").popover('show');
+                            setTimeout(function () {
+                                $("#room-code").popover('hide');
+                            }, 1000);
+                        });
+                });
+            });
+
+
+        </script>
+        {% for message in messages %}
+            <script type="text/javascript">
+                createChatItem("{{message.message}}", "{{message.sender}}")
+            </script>
+        {% endfor %}
+    </div>
+{% endblock %}
