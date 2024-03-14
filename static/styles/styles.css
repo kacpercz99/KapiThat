@@ -1,30 +1,56 @@
-#join, #create, #heading, #send-btn, .self-message-item {
-    background: var(--bs-indigo);
-    color: var(--bs-white);
+#join,
+#create,
+#heading,
+#send-btn,
+#record-btn,
+.self-message-item,
+#footer {
+  background: var(--bs-indigo);
+  color: var(--bs-white);
+}
+#create:hover,
+#join:hover,
+#send-btn:hover,
+#record-btn:hover {
+  background: #560dce;
 }
 
+#messages {
+  background: var(--bs-tertiary-bg);
+}
 #room-main {
-    background: var(--bs-secondary-bg);
-    height: 100vh;
-}
-
-#room-messages-box {
-    background: var(--bs-tertiary-bg);
-}
-
-.self-message-item {
-    margin-left: auto;
-    margin-right: 0;
+  background: var(--bs-secondary-bg);
 }
 
 .peer-message-item {
-    background: var(--bs-secondary-bg);
+  background: var(--bs-secondary-bg);
 }
 
-#room-code, #room-code-cb {
-    color: var(--bs-indigo);
+#room-code,
+#room-code-cb {
+  color: var(--bs-indigo);
 }
 
 #room-code:hover {
-    color: var(--bs-white);
+  color: var(--bs-white);
+}
+
+::-webkit-scrollbar {
+  background: var(--bs-secondary-bg);
+  border-radius: 1rem;
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 1rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bs-indigo);
+  border-radius: 1rem;
+}
+
+audio {
+  max-height: 40px;
+  max-width: 400px;
+  padding-top: 4px;
 }

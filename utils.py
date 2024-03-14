@@ -4,7 +4,7 @@ from os import path
 from secrets import token_urlsafe
 
 
-def generate_room_code(length: int, existing_codes: list[str]) -> str:
+def generate_room_code(length: int, existing_codes: list) -> str:
     while True:
         code_chars = [choice(ascii_letters) for _ in range(length)]
         code = ''.join(code_chars)
@@ -13,9 +13,9 @@ def generate_room_code(length: int, existing_codes: list[str]) -> str:
 
 
 def create_enf_if_not_exists(app):
-    if not path.exists('.env'):
+    if not path.exists('../../Desktop/kapithat/KapiThat-master/.env'):
         from dotenv import set_key
 
         with app.app_context():
             new_secret_key = token_urlsafe(24)
-            set_key(".env", "SECRET_KEY", new_secret_key)
+            set_key("../../Desktop/kapithat/KapiThat-master/.env", "SECRET_KEY", new_secret_key)

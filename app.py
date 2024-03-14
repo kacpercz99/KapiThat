@@ -2,8 +2,8 @@ from flask import Flask, request, render_template, redirect, url_for, session
 from flask_socketio import SocketIO, join_room, leave_room, send
 from os import getenv
 from dotenv import load_dotenv
-from utils import *
-import cryptography
+from utils import generate_room_code, create_enf_if_not_exists
+import base64
 
 app = Flask(__name__)
 
@@ -67,7 +67,7 @@ def room():
 
 
 @socketio.on('connect')
-def handle_connect():
+def handle_connect(auth):
     name = session.get('name')
     room = session.get('room')
 
@@ -100,22 +100,39 @@ def handle_message(payload):
     rooms[room]["messages"].append(message)
 
 
+@socketio.on('voice-message')
+def handle_voice_message(data):
+    room = session.get('room')
+    name = session.get('name')
+
+    if room not in rooms:
+        return
+
+    message = {
+        "sender": name,
+        "message": data["message"],
+        "is_voice_message": True
+    }
+    socketio.emit('voice-message', message, to=room)
+    rooms[room]["messages"].append(message)
+
+
 @socketio.on('disconnect')
 def handle_disconnect():
     room = session.get("room")
     name = session.get("name")
-    leave_room(room)
 
     if room in rooms:
+        leave_room(room)
         rooms[room]["members"] -= 1
+        if rooms[room]["members"] >= 1:
+            send({
+                "message": f"{name} has left the chat",
+                "sender": ""
+            }, to=room)
         if rooms[room]["members"] <= 0:
             del rooms[room]
 
-    send({
-        "message": f"{name} has left the chat",
-        "sender": ""
-    }, to=room)
-
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=42068, allow_unsafe_werkzeug=True, ssl_context='adhoc')
+    socketio.run(app, host='0.0.0.0', port=42068, allow_unsafe_werkzeug=True)
