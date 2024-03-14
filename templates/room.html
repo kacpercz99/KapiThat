@@ -33,7 +33,8 @@
                 <button class="btn" type="button" id="record-btn" onclick="startRecording()">
                     Record
                 </button>
-                <button class="btn btn-danger" type="button" id="stop-btn" onclick="stopRecording()" style="display: none;">
+                <button class="btn btn-danger" type="button" id="stop-btn" onclick="stopRecording()"
+                        style="display: none;">
                     Stop
                 </button>
             </div>
@@ -217,8 +218,17 @@
             });
         });
     </script>
-    {% for message in messages %} {% if message.sender != user %}
-        <script type="text/javascript">
-            createChatItem("{{ message.message }}", "{{ message.sender }}");
-        </script>
-    {% endif %} {% endfor %} {% endblock %}
+    {% for message in messages %}
+        {% if message.sender != user %}
+            {% if message.is_voice_message %}
+                <script type="text/javascript">
+                    createChatItem("{{ message.message }}", "{{ message.sender }}", true);
+                </script>
+            {% else %}
+                <script type="text/javascript">
+                    createChatItem("{{ message.message }}", "{{ message.sender }}");
+                </script>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}
