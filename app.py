@@ -3,7 +3,6 @@ from flask_socketio import SocketIO, join_room, leave_room, send
 from os import getenv
 from dotenv import load_dotenv
 from utils import generate_room_code, create_enf_if_not_exists
-import base64
 
 app = Flask(__name__)
 
