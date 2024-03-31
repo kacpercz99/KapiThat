@@ -6,10 +6,10 @@
                 <span id="room-code"
                       data-toggle="popover"
                       data-content="Click to copy">
-                    {{ room }}
+                    {{ room.code }}
                 </span>
             </h2>
-            <a class="btn btn-danger mb-2 mt-2" href="/" id="leave-chat-btn">
+            <a class="btn btn-danger mb-2 mt-2" href="{{ url_for('main.home') }}" id="leave-chat-btn">
                 Leave the room
             </a>
             <hr class="mb-2"/>
@@ -45,20 +45,8 @@
             referrerpolicy="no-referrer"
     ></script>
     <script>
-        var currentUser = "{{ user }}";
+        var currentUser = "{{ current_user.username }}";
+        var roomCode = "{{ room.code }}"
     </script>
-    <script src="{{ url_for('static',filename='js/room.js') }}" defer></script>
-    {% for message in messages %}
-        {% if message.sender != user %}
-            {% if message.is_voice_message %}
-                <script type="text/javascript">
-                    createChatItem("{{ message.message }}", "{{ message.sender }}", true);
-                </script>
-            {% else %}
-                <script type="text/javascript">
-                    createChatItem("{{ message.message }}", "{{ message.sender }}");
-                </script>
-            {% endif %}
-        {% endif %}
-    {% endfor %}
+    <script src="{{ url_for('static',filename='js/room.js') }}"></script>
 {% endblock %}

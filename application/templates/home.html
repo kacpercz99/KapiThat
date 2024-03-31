@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% block content %} {% if error %}
+    <div class="row m-2">
+        <p id="error" class="alert alert-danger">{{ error }}</p>
+    </div>
+{% endif %}
+    <div class="row m-2">
+        <h1 id="username">Witaj, {{ current_user.username }}</h1>
+        <h2>Dostępne pokoje</h2>
+        <ul>
+            {% for room in rooms %}
+                <li>
+                    <a href="{{ url_for('main.room', room_code=room.code) }}">{{ room.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <form class="m-2 text-center" method="post">
+        <div class="row justify-content-center">
+            <div class="col-6 mb-3">
+                <label for="room_name" class="form-label">Stwórz nowy pokój</label>
+                <input type="text" class="form-control" id="room_name" name="room_name" required/>
+                <button type="submit" id="create" name="create" class="btn">Stwórz pokój</button>
+            </div>
+        </div>
+    </form>
+    <form action="{{ url_for('main.logout') }}" method="post">
+        <button type="submit" class="btn">Wyloguj się</button>
+    </form>
+    <button id="exportBtn" class="btn">Eksportuj klucze</button>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/jquery-qrcode-0.18.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/keyExport.js') }}"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $('#exportBtn').click(function() {
+            let username = "{{ current_user.username }}";
+            console.log(username)
+            exportKeys(username);
+        });
+    });
+    </script>
+{% endblock %}

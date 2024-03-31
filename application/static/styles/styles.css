@@ -1,17 +1,11 @@
-#join,
-#create,
+.btn,
 #heading,
-#send-btn,
-#record-btn,
-.self-message-item,
-#footer {
+#footer,
+.self-message-item{
   background: var(--bs-indigo);
   color: var(--bs-white);
 }
-#create:hover,
-#join:hover,
-#send-btn:hover,
-#record-btn:hover {
+.btn:hover{
   background: #560dce;
 }
 

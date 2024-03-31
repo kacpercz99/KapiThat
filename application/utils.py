@@ -14,10 +14,11 @@ def generate_room_code(length: int, existing_codes: list) -> str:
             return code
 
 
-def create_enf_if_not_exists(app):
+def create_env_if_not_exist(app):
     current_dir = os.path.dirname(os.path.abspath(__file__))
     env_path = path.join(current_dir, '.env')
     if not path.exists(env_path):
         with app.app_context():
             new_secret_key = token_urlsafe(24)
             set_key(env_path, "SECRET_KEY", new_secret_key)
+            set_key(env_path, "SQLALCHEMY_DATABASE_URI", "sqlite:///kapithat.db")

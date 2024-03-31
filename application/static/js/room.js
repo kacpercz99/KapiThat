@@ -2,26 +2,9 @@ var socketio = io();
 var mediaRecorder;
 var chunks = [];
 var isRecording = false;
+var lastMessageTime = null;
 
-function formatMessageDate(date) {
-    const userLocale = navigator.language;
-    moment.locale(userLocale);
-
-    const currentDate = moment();
-    const messageDate = moment(date);
-
-    if (currentDate.isSame(messageDate, "day")) {
-        if (moment.localeData().longDateFormat("LT").includes("A")) {
-            return messageDate.format("LT");
-        } else {
-            return messageDate.format("HH:mm");
-        }
-    } else {
-        return messageDate.format("LL");
-    }
-}
-
-function createChatItem(message, sender, isVoiceMessage = false) {
+function createChatItem(message, sender, timestamp, isVoiceMessage = false) {
     var messages = $("#messages");
     var senderIsUser = currentUser === sender;
     var content;
@@ -38,7 +21,7 @@ function createChatItem(message, sender, isVoiceMessage = false) {
                                     <source src="${message}" type="audio/mpeg">
                                     Your browser does not support the audio element.
                                 </audio><br>
-                                <small>${formatMessageDate(new Date())}</small>
+                                <small>${timestamp}</small>
                             </p>
                         </div>
                     </div>
@@ -50,7 +33,7 @@ function createChatItem(message, sender, isVoiceMessage = false) {
                             <p class="mb-0">
                                 ${senderMsg}
                                 ${message}<br>
-                                <small>${formatMessageDate(new Date())}</small>
+                                <small>${timestamp}</small>
                             </p>
                         </div>
                     </div>
@@ -65,7 +48,8 @@ function sendMessage() {
     var msgInput = $("#message-input");
     if (msgInput.val() === "") return;
     var msg = msgInput.val();
-    socketio.emit("message", {message: msg});
+    console.log("sending message: ", msg)
+    socketio.emit("message", {message: msg, is_voice_message: false});
     msgInput.val("");
 }
 
@@ -100,23 +84,26 @@ function stopRecording() {
         var reader = new FileReader();
         reader.onloadend = function () {
             var base64data = reader.result;
-            socketio.emit("voice-message", {message: base64data});
+            socketio.emit("message", {message: base64data, is_voice_message: true});
         };
         reader.readAsDataURL(blob);
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
     };
 }
 
+function handleReceivedMessage(message) {
+    createChatItem(message.content, message.sender, message.timestamp, message.is_voice_message);
+}
+
 $(document).ready(function () {
-    socketio.on("message", function (message) {
-        //console.log('message received')
-        createChatItem(message.message, message.sender);
+
+    $.get(`/get_messages/${roomCode}`, function(data){
+       data.messages.forEach(function(message){
+          handleReceivedMessage(message);
+       });
     });
 
-    socketio.on('voice-message', function (data) {
-        //console.log('voice message received')
-        createChatItem(data.message, data.sender, true);
-    })
+    socketio.on("message", handleReceivedMessage);
 
     const inputHeight = $("#input").outerHeight();
     const headerHeight = $("header").outerHeight();
