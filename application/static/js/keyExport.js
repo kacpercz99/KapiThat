@@ -31,40 +31,32 @@ function exportKeys(username) {
                 let keyPairString = JSON.stringify(keyPair);
 
                 let modal = document.createElement('div');
-                modal.style.position = 'fixed';
-                modal.style.top = '50%';
-                modal.style.left = '50%';
-                modal.style.transform = 'translate(-50%, -50%)';
-                modal.style.backgroundColor = 'white';
-                modal.style.padding = '40px';
-                modal.style.borderRadius = '10px';
-                modal.style.zIndex = '1000';
-                modal.style.textAlign = 'center';
-
+                modal.id = 'popupModal';
+                modal.classList.add('text-center');
                 let message = document.createElement('p');
                 message.textContent = 'Zeskanuj kod QR na innym urządzeniu, aby wyeksportować klucz prywatny i publiczny.';
                 message.style.color = 'black';
                 modal.appendChild(message);
-                let publicQrCode = document.createElement('div');
-                publicQrCode.id = 'qrCodePub';
-                modal.appendChild(publicQrCode);
-                let privateQrCode = document.createElement('div');
-                privateQrCode.id = 'qrCodePriv';
-                modal.appendChild(privateQrCode);
+                let QrCode = document.createElement('div');
+                QrCode.id = 'qrCode';
+                modal.appendChild(QrCode);
                 let closeButton = document.createElement('button');
+                closeButton.classList.add('btn');
                 closeButton.textContent = 'Zamknij';
                 $(closeButton).click(function() {
                     $(modal).remove();
                 });
                 modal.appendChild(closeButton);
                 document.body.appendChild(modal);
-                $("#qrCodePub").qrcode({
-                    mode: 0,
-                    text: publicKey.key
-                });
-                $("#qrCodePriv").qrcode({
-                    mode: 0,
-                    text: privateKey.key
+                console.log(privateKey.key.length)
+
+                $("#qrCode").kjua({
+                    render: 'svg',
+                    text: privateKey.key,
+                    crisp: true,
+                    ecLevel: 'L',
+                    size: 500,
+                    mode: 'plain'
                 });
             };
         };

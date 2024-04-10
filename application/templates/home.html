@@ -14,30 +14,100 @@
             {% endfor %}
         </ul>
     </div>
-    <form class="m-2 text-center" method="post">
+    <form class="text-center" method="post" id="createForm">
         <div class="row justify-content-center">
             <div class="col-6 mb-3">
+                <input type="hidden" id="aes_key" name="aes_key">
                 <label for="room_name" class="form-label">Stwórz nowy pokój</label>
                 <input type="text" class="form-control" id="room_name" name="room_name" required/>
-                <button type="submit" id="create" name="create" class="btn">Stwórz pokój</button>
+                <button type="button" id="create" name="create" class="btn">Stwórz pokój</button>
             </div>
         </div>
     </form>
     <form action="{{ url_for('auth.logout') }}" method="post">
-        <button type="submit" class="btn">Wyloguj się</button>
+        <div class="row justify-content-center">
+            <div class="col-6 mb-3">
+                <button type="submit" class="btn">Wyloguj się</button>
+            </div>
+        </div>
     </form>
-    <button id="exportBtn" class="btn">Eksportuj klucze</button>
+    <div class="row justify-content-center">
+        <div class="col-6 mb-3">
+            <button id="exportBtn" class="btn">Eksportuj klucze</button>
+        </div>
+    </div>
+    <button id="invitation-button" class="btn" data-bs-toggle="modal" data-bs-target="#invitationModal">
+        <i id="notification-bell" class="fa fa-bell"></i>
+        Invitations
+    </button>
+
+    <div class="modal fade" id="invitationModal" tabindex="-1" aria-labelledby="invitationModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="invitationModalLabel">Invitations</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="invitation-list"></div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/jquery-qrcode-0.18.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kjua-0.9.0.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataUtils.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/aesKeyGen.js') }}"></script>
     <script src="{{ url_for('static', filename='js/keyExport.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/keyCheck.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/keyImport.js') }}"></script>
     <script type="text/javascript">
-    $(document).ready(function() {
-        $('#exportBtn').click(function() {
+        $(document).ready(function () {
             let username = "{{ current_user.username }}";
-            console.log(username)
-            exportKeys(username);
+            $('#exportBtn').click(function () {
+                console.log(username)
+                exportKeys(username);
+            });
+            check(username);
+
+            $('#create').click(async function () {
+                let room_name = $('#room_name').val();
+                if (room_name.length > 0) {
+                    let encrypted_key = await process(username);
+                    $('#aes_key').val(encrypted_key);
+                    $('#createForm').submit();
+                }
+            });
+
+            setInterval(function () {
+                $.get('/invitations/{{ current_user.id }}', function (data) {
+                    var invitationButton = $('#invitation-button');
+                    var invitationList = $('#invitation-list');
+                    if (data.error) {
+                        invitationButton.hide();
+                    } else {
+                        invitationList.empty();
+                        data.invitations.forEach(function (invitation) {
+                            var listItem = $('<li></li>');
+                            listItem.text(invitation.sender + ' has invited you to room ' + invitation.room_code);
+                            var acceptButton = $('<button></button>');
+                            acceptButton.text('Accept');
+                            acceptButton.click(function () {
+                                $.post('/accept_invitation/' + invitation.id, function (data) {
+                                    if (data.error) {
+                                        alert(data.error);
+                                    } else {
+                                        location.reload();
+                                    }
+                                });
+                            });
+                            listItem.append(acceptButton);
+                            invitationList.append(listItem);
+                        });
+                        invitationButton.show();
+                    }
+                });
+            }, 15000);
         });
-    });
     </script>
 {% endblock %}

@@ -11,7 +11,7 @@
 <form method="post">
     {{ form.hidden_tag() }}
     <input type="hidden" id="publicKey" name="public_key">
-    <div class="row mb-3">
+    <div class="row my-3">
         {{ form.username.label(class="col-sm-2 col-form-label") }}
         <div class="col-sm-10">
             {{ form.username(class="form-control") }}
@@ -29,19 +29,27 @@
             {{ form.confirm_password(class="form-control") }}
         </div>
     </div>
-    {{ form.submit(class="btn", id="submitBtn") }}
+    <div class="row">
+        <div class="col-sm-10 offset-sm-1">
+            <button type="button" id="submitButton" class="btn">
+                Prześlij
+            </button>
+        </div>
+    </div>
 </form>
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static',filename='js/keyGen.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataUtils.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/rsaKeyGen.js') }}"></script>
     <script>
         $(document).ready(function() {
-            $('form').on('submit', async function (e) {
+            $('#submitButton').on('click', async function () {
                 console.log('generating key pair')
                 let username = $('#username').val();
                 let publicKey = await generateAndStoreKeyPair(username);
                 console.log('key pair generated')
                 $('#publicKey').val(publicKey);
+                $('form').submit();
             });
         });
     </script>

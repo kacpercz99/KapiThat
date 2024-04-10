@@ -2,7 +2,18 @@ var socketio = io();
 var mediaRecorder;
 var chunks = [];
 var isRecording = false;
-var lastMessageTime = null;
+function formatTimestamp(timestamp) {
+    let date = new Date(timestamp);
+    let today = new Date();
+
+    if (date.toDateString() === today.toDateString()) {
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (date.getFullYear() === today.getFullYear()) {
+        return date.toLocaleDateString([], { month: '2-digit', day: '2-digit' });
+    } else {
+        return date.getFullYear().toString();
+    }
+}
 
 function createChatItem(message, sender, timestamp, isVoiceMessage = false) {
     var messages = $("#messages");
@@ -44,12 +55,13 @@ function createChatItem(message, sender, timestamp, isVoiceMessage = false) {
     messages.animate({scrollTop: messages.prop("scrollHeight")}, 300);
 }
 
-function sendMessage() {
+async function sendMessage() {
     var msgInput = $("#message-input");
     if (msgInput.val() === "") return;
     var msg = msgInput.val();
     console.log("sending message: ", msg)
-    socketio.emit("message", {message: msg, is_voice_message: false});
+    var encryptedMessage = await encryptMessage(msg);
+    socketio.emit("message", {message: encryptedMessage, is_voice_message: false});
     msgInput.val("");
 }
 
@@ -82,17 +94,24 @@ function stopRecording() {
         var blob = new Blob(chunks, {type: 'audio/webm'});
         chunks = [];
         var reader = new FileReader();
-        reader.onloadend = function () {
+        reader.onloadend = async function () {
             var base64data = reader.result;
-            socketio.emit("message", {message: base64data, is_voice_message: true});
+            var encryptedBase64Data = await encryptMessage(base64data);
+            socketio.emit("message", {message: encryptedBase64Data, is_voice_message: true});
         };
         reader.readAsDataURL(blob);
         mediaRecorder.stream.getTracks().forEach(track => track.stop());
     };
 }
 
-function handleReceivedMessage(message) {
-    createChatItem(message.content, message.sender, message.timestamp, message.is_voice_message);
+async function handleReceivedMessage(message) {
+    let decryptedMessage;
+    if (message.sender === "") {
+        decryptedMessage = message.content;
+    } else {
+        decryptedMessage = await decryptMessage(message.content);
+    }
+    createChatItem(decryptedMessage, message.sender, formatTimestamp(message.timestamp), message.is_voice_message);
 }
 
 $(document).ready(function () {
@@ -128,22 +147,5 @@ $(document).ready(function () {
             event.preventDefault();
             sendMessage();
         }
-    });
-
-    const roomcode = $("#room-code");
-
-    roomcode.popover({
-        content: "Room code copied!",
-        trigger: "manual",
-    });
-
-    roomcode.click(function () {
-        var roomCode = $("#room-code").text().trim();
-        navigator.clipboard.writeText(roomCode).then(function () {
-            $("#room-code").popover("show");
-            setTimeout(function () {
-                $("#room-code").popover("hide");
-            }, 1000);
-        });
     });
 });

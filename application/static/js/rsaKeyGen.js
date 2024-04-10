@@ -1,27 +1,22 @@
 async function generateAndStoreKeyPair(username) {
+    console.log("Generating key pair for " + username);
+
     let keyPair = await window.crypto.subtle.generateKey(
         {
             name: "RSA-OAEP",
             modulusLength: 2048,
-            publicExponent: new Uint8Array([1,0,1]),
-            hash: "SHA-256"
+            publicExponent: new Uint8Array([0x01,0x00,0x01]),
+            hash: {name: "SHA-256"}
         },
         true,
         ["encrypt", "decrypt"]
     );
 
-    let publicKeyToExport = await window.crypto.subtle.exportKey(
-        "spki",
-        keyPair.publicKey
-    );
+    let exportedPublicKey = await window.crypto.subtle.exportKey("spki", keyPair.publicKey);
+    let exportedPrivateKey = await window.crypto.subtle.exportKey("pkcs8", keyPair.privateKey);
 
-    let privateKeyToExport = await window.crypto.subtle.exportKey(
-        "pkcs8",
-        keyPair.privateKey
-    );
-
-    let base64PublicKey = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(publicKeyToExport))));
-    let base64PrivateKey = btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(privateKeyToExport))));
+    let base64PublicKey = encodeData(exportedPublicKey);
+    let base64PrivateKey = encodeData(exportedPrivateKey);
 
     let dbRequest = indexedDB.open("keyDatabase", 1);
     dbRequest.onupgradeneeded = function(event) {
@@ -32,9 +27,10 @@ async function generateAndStoreKeyPair(username) {
         let db = event.target.result;
         let transaction = db.transaction("keys", "readwrite");
         let keyStore = transaction.objectStore("keys");
+
         keyStore.add({id: username + "_privateKey", key: base64PrivateKey});
         keyStore.add({id: username + "_publicKey", key: base64PublicKey});
-    };
 
+    };
     return base64PublicKey;
 }

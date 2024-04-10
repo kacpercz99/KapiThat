@@ -8,7 +8,18 @@
 .btn:hover{
   background: #560dce;
 }
-
+#modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(50,50,50,0.3);
+    color: white;
+    padding: 40px;
+    border-radius: 10px;
+    z-index: 1000;
+    text-align: center;
+}
 #messages {
   background: var(--bs-tertiary-bg);
 }
@@ -47,4 +58,24 @@ audio {
   max-height: 40px;
   max-width: 400px;
   padding-top: 4px;
+}
+
+#invitation-button {
+    display: none;
+}
+
+#notification-bell {
+    animation: bell 1s infinite;
+}
+
+@keyframes bell {
+    0% { transform: rotate(0); }
+    10% { transform: rotate(30deg); }
+    20% { transform: rotate(-20deg); }
+    30% { transform: rotate(20deg); }
+    40% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    60% { transform: rotate(-5deg); }
+    70% { transform: rotate(5deg); }
+    100% { transform: rotate(0); }
 }

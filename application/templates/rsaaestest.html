@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Key Generation and Encryption Test</title>
+    <style>
+        p {
+            max-width: 1300px;
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="decryptAESKey()">Decrypt AES Key</button>
+    <button onclick="encryptMessage()">Encrypt Message</button>
+    <button onclick="decryptMessage()">Decrypt Message</button>
+    <h2>Public RSA Key</h2>
+    <p id="pubRSA"></p>
+    <h2>Private RSA Key</h2>
+    <p id="privateRSA"></p>
+    <h2>AES Key</h2>
+    <label for="importAES">Import AES Key:</label>
+    <input type="text" id="importAES">
+    <button onclick="importAESKey()">Import AES Key</button>
+    <p id="AES"></p>
+    <button onclick="encryptAESKey()">Encrypt AES Key</button>
+    <h2>Encrypted AES Key</h2>
+    <p id="encryptedAES"></p>
+    <button onclick="decryptAESKey()">Decrypt AES Key</button>
+    <h2>Decrypted AES Key</h2>
+    <p id="decryptedAES"></p>
+    <h2>Are the same after decryption?</h2>
+    <button onclick="encryptionCheck()">Check</button>
+    <p id="check">Click button</p>
+    <h2>Encrypt a message</h2>
+    <label for="message">Message:</label>
+    <input type="text" id="message">
+    <button onclick="encryptMessage()">Encrypt Message</button>
+    <h3>Encrypted Message:</h3>
+    <p id="encryptedMessage">empty</p>
+    <label for="decryptedMessage">Decrypt a message:</label>
+    <input type="text" id="decryptedMessage">
+    <button onclick="decryptMessage()">Decrypt Message</button>
+    <h3>Decrypted Message</h3>
+    <p id="decryptedMessageOutput">empty</p>
+
+    <script>
+        let AESKey;
+        let b64AESKey;
+        let b64RSAPublicKey;
+        let b64RSAPrivateKey;
+        let encryptedB64AESKey;
+        let decryptedB64AESKey;
+        let encryptedMessage;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            generateKeys();
+        });
+
+        function encodeKey(key) {
+            return btoa(String.fromCharCode.apply(null, new Uint8Array(key)));
+        }
+
+        function decodeKey(key) {
+            return new Uint8Array(atob(key).split("").map(function (c) {
+                return c.charCodeAt(0);
+            }));
+        }
+
+        async function generateKeys() {
+            let keyPair = await window.crypto.subtle.generateKey(
+                {
+                    name: "RSA-OAEP",
+                    modulusLength: 2048,
+                    publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+                    hash: {name: "SHA-256"}
+                },
+                true,
+                ["encrypt", "decrypt"]
+            );
+
+            rsaPublicKey = keyPair.publicKey;
+            rsaPrivateKey = keyPair.privateKey;
+
+            let exportedPublicKey = await window.crypto.subtle.exportKey("spki", rsaPublicKey);
+            let exportedPrivateKey = await window.crypto.subtle.exportKey("pkcs8", rsaPrivateKey);
+            let encodedPublicKey = encodeKey(exportedPublicKey);
+            let encodedPrivateKey = encodeKey(exportedPrivateKey)
+
+            let aesKey = await window.crypto.subtle.generateKey(
+                {
+                    name: "AES-CBC",
+                    length: 256
+                },
+                true,
+                ["encrypt", "decrypt"]
+            );
+
+            let exportedAESKey = await window.crypto.subtle.exportKey("raw", aesKey);
+            let encodedAESKey = encodeKey(exportedAESKey)
+
+            document.getElementById("pubRSA").innerText = encodedPublicKey;
+            document.getElementById("privateRSA").innerText = encodedPrivateKey;
+            document.getElementById("AES").innerText = encodedAESKey;
+            AESKey = exportedAESKey;
+            console.log(AESKey);
+            b64AESKey = encodedAESKey;
+            b64RSAPublicKey = encodedPublicKey;
+            b64RSAPrivateKey = encodedPrivateKey;
+        }
+
+       async function encryptAESKey() {
+            let importedPubRSA = window.crypto.subtle.importKey(
+                "spki",
+                decodeKey(b64RSAPublicKey),
+                {name: "RSA-OAEP", hash: {name: "SHA-256"}},
+                true,
+                ["encrypt"]
+            );
+            let encryptedAES = window.crypto.subtle.encrypt(
+                {name: "RSA-OAEP"},
+                await importedPubRSA,
+                AESKey
+            );
+
+            let encodedEncryptedAES = encodeKey(await encryptedAES);
+            encryptedB64AESKey = encodedEncryptedAES;
+            document.getElementById("encryptedAES").innerText = encodedEncryptedAES;
+        }
+
+        async function decryptAESKey() {
+
+            let importedPrivateRSA = window.crypto.subtle.importKey(
+                "pkcs8",
+                decodeKey(b64RSAPrivateKey),
+                {name: "RSA-OAEP", hash: {name: "SHA-256"}},
+                true,
+                ["decrypt"]
+            );
+            let decodedEncryptedAES = decodeKey(encryptedB64AESKey);
+
+            let decryptedAES = await window.crypto.subtle.decrypt(
+                {name: "RSA-OAEP"},
+                await importedPrivateRSA,
+                decodedEncryptedAES
+            );
+            let encodedDecryptedAES = encodeKey(decryptedAES);
+            document.getElementById("decryptedAES").innerText = encodedDecryptedAES;
+            console.log(decryptedAES);
+            aesKey = decryptedAES;
+            decryptedB64AESKey = encodedDecryptedAES;
+        }
+
+        function encryptionCheck() {
+            if (document.getElementById("AES").innerText === document.getElementById("decryptedAES").innerText) {
+                document.getElementById("check").innerText = "The same";
+            } else {
+                document.getElementById("check").innerText = "Not the same";
+            }
+        }
+
+        async function encryptMessage() {
+            let message = document.getElementById("message").value;
+            let iv = window.crypto.getRandomValues(new Uint8Array(16));
+            let importedAES = window.crypto.subtle.importKey(
+                "raw",
+                AESKey,
+                {name: "AES-CBC"},
+                true,
+                ["encrypt"]
+            );
+            let encryptedMessage = window.crypto.subtle.encrypt(
+                {name: "AES-CBC", iv: iv},
+                await importedAES,
+                new TextEncoder().encode(message)
+            );
+            let b64iv = encodeKey(iv);
+            let b64encryptedMessage = encodeKey(await encryptedMessage);
+            document.getElementById("encryptedMessage").innerText = b64iv + "." + b64encryptedMessage;
+        }
+
+        async function decryptMessage() {
+            let message = document.getElementById("decryptedMessage").value;
+            let parts = message.split(".");
+            let iv = decodeKey(parts[0]);
+            let encryptedMessage = decodeKey(parts[1]);
+            let importedAES = window.crypto.subtle.importKey(
+                "raw",
+                AESKey,
+                {name: "AES-CBC"},
+                true,
+                ["decrypt"]
+            );
+            let decryptedMessage = window.crypto.subtle.decrypt(
+                {name: "AES-CBC", iv: iv},
+                await importedAES,
+                encryptedMessage
+            );
+            document.getElementById("decryptedMessageOutput").innerText = new TextDecoder().decode(await decryptedMessage);
+        }
+
+        function importAESKey() {
+            AESKey = decodeKey(document.getElementById("importAES").value);
+            b64AESKey = document.getElementById("importAES").value;
+            document.getElementById("AES").innerText = document.getElementById("importAES").value;
+        }
+    </script>
+</body>
+</html>

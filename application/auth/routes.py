@@ -13,9 +13,9 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         hashed_password = generate_password_hash(form.password.data)
+
         public_key_b64 = request.form.get('public_key')
-        public_key = base64.b64decode(public_key_b64)
-        new_user = User(username=form.username.data, password=hashed_password, public_key=public_key)
+        new_user = User(username=form.username.data, password=hashed_password, public_key=public_key_b64)
         db.session.add(new_user)
         db.session.commit()
         login_user(new_user)

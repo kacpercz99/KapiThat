@@ -2,17 +2,41 @@
     <div class="row" id="room-info">
         <div class="col text-start">
             <h2>
-                Room Code:
-                <span id="room-code"
-                      data-toggle="popover"
-                      data-content="Click to copy">
-                    {{ room.code }}
-                </span>
+                Room: {{ room.name }}
             </h2>
             <a class="btn btn-danger mb-2 mt-2" href="{{ url_for('main.home') }}" id="leave-chat-btn">
                 Leave the room
             </a>
+            <button type="button" id="invite-user" class="btn" data-bs-toggle="modal" data-bs-targer="#inviteUserModal">
+                Invite a user
+            </button>
+            <div class="modal fade" id="inviteUserModal" tabindex="-1" aria-labelledby="inviteUserModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="inviteUserModalLabel">Invite a User</h5>
+                            <button type="button" id="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="inviteUserForm">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username" name="username" required>
+                                    <button type="button" id="search-btn" class="btn">Search</button>
+                                    <select id="user-list" class="form-select"></select>
+                                </div>
+                                <button type="button" id="invite-btn" class="btn">Invite</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <hr class="mb-2"/>
+            <span>
+                Users: {% for user in room.members %} {{ user.username }} {% endfor %}
+            </span>
+            <hr class="mb-2">
         </div>
     </div>
     <div class="row flex-grow-1">
@@ -38,15 +62,21 @@
     </div>
 {% endblock %}
 {% block scripts %}
-    <script
-            src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"
-            integrity="sha512-42PE0rd+wZ2hNXftlM78BSehIGzezNeQuzihiBCvUEB3CVxHvsShF86wBWwQORNxNINlBPuq7rG4WWhNiTVHFg=="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-    ></script>
-    <script>
+    <script src="{{ url_for('static', filename='js/dataUtils.js') }}"></script>
+    <script type="text/javascript">
         var currentUser = "{{ current_user.username }}";
-        var roomCode = "{{ room.code }}"
+        var currentUserId = "{{ current_user.id }}";
+        var roomCode = "{{ room.code }}";
+        var roomName = "{{ room.name }}";
+        var encAESKey = "{{ enc_aes_key }}";
+        var aesKey;
     </script>
-    <script src="{{ url_for('static',filename='js/room.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/aesUtils.js') }}"></script>
+    <script type="text/javascript">
+        $(document).ready(async function() {
+            aesKey = await decryptAESKey();
+        });
+    </script>
+    <script src="{{ url_for('static',filename='js/messageHandler.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/userInvite.js') }}"></script>
 {% endblock %}
