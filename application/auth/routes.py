@@ -1,7 +1,6 @@
 from flask import request, flash, redirect, render_template, url_for, session
 from flask_login import login_user, current_user, login_required, logout_user
 from . import auth
-import base64
 from .forms import RegisterForm, LoginForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from ..models.user import User
