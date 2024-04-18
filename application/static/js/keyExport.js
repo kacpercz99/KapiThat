@@ -55,8 +55,9 @@ function exportKeys(username) {
                     text: privateKey.key,
                     crisp: true,
                     ecLevel: 'L',
-                    size: 500,
-                    mode: 'plain'
+                    size: 700,
+                    mode: 'black',
+                    back: 'white'
                 });
             };
         };

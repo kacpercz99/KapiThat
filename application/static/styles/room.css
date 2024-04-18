@@ -1,0 +1,41 @@
+.self-message-item{
+  background: #6610f2;
+  color: #fff;
+}
+
+#messages {
+  background: #2b3035;
+}
+
+#room-main,
+.peer-message-item{
+  background: #343a40;
+}
+
+::-webkit-scrollbar {
+  background: #343a40;
+  border-radius: 1rem;
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  border-radius: 1rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6610f2;
+  border-radius: 1rem;
+}
+
+audio {
+  max-height: 40px;
+  max-width: 400px;
+  padding-top: 4px;
+}
+
+#send-btn {
+  border-right: white 1px solid;
+}
+
+#record-btn {
+    border-left: white 1px solid;
+}

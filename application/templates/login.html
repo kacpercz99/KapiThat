@@ -8,22 +8,19 @@
         {% endfor %}
     {% endif %}
 {% endwith %}
-<form method="post">
+<form method="post" class="col col-lg-4 offset-lg-4 mt-3 p-3">
     {{ form.hidden_tag() }}
     <div class="row mb-3">
-        {{ form.username.label(class="col-sm-2 col-form-label") }}
-        <div class="col-sm-10">
-            {{ form.username(class="form-control") }}
-        </div>
+        {{ form.username.label(class="form-label") }}
+        {{ form.username(class="form-control") }}
     </div>
     <div class="row mb-3">
-        {{ form.password.label(class="col-sm-2 col-form-label") }}
-        <div class="col-sm-10">
-            {{ form.password(class="form-control") }}
-        </div>
+        {{ form.password.label(class="form-label") }}
+        {{ form.password(class="form-control") }}
     </div>
     {{ form.submit(class="btn") }}
 </form>
+    <p>Nie masz konta? <a href="{{ url_for('auth.register') }}">Zarejestruj </a>się!</p>
 {% endblock %}
 {% block scripts %}
 {% endblock %}

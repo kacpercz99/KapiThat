@@ -1,0 +1,10 @@
+.btn,
+#heading,
+#footer {
+    background: #6610f2;
+    color: #fff;
+}
+
+.btn:hover {
+    background: #560dce;
+}

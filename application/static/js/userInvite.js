@@ -15,6 +15,7 @@ $(document).ready(function () {
                 userList.append(new Option('No users found', ''));
                 invButton.attr("disabled", true)
             } else {
+                userList.attr("disabled", false)
                 data.users.forEach(function (user) {
                     userList.append(new Option(user.username, user.id));
                 });

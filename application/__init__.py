@@ -7,6 +7,8 @@ from os import getenv
 
 def init_app():
     app = Flask(__name__)
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
 
     create_env_if_not_exist(app)
     load_dotenv()
@@ -14,7 +16,7 @@ def init_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = getenv('SQLALCHEMY_DATABASE_URI')
     app.config['SECRET_KEY'] = getenv('SECRET_KEY')
 
-    login_manager.login_view = 'main.login'
+    login_manager.login_view = 'auth.login'
 
     from .main import main as main_blueprint
     app.register_blueprint(main_blueprint)

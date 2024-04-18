@@ -20,10 +20,11 @@ def home():
     if request.method == "POST":
         room_name = request.form.get('room_name')
         aes_key = request.form.get('aes_key')
+        owner_username = current_user.username
         if room_name:
             existing_codes = [room.code for room in Room.query.all()]
             code = generate_room_code(8, existing_codes)
-            new_room = Room(name=room_name, code=code)
+            new_room = Room(name=room_name, code=code, owner=owner_username)
             new_room.members.append(current_user)
             db.session.add(new_room)
             db.session.commit()
@@ -32,7 +33,6 @@ def home():
             db.session.commit()
             flash('Pomyślnie utworzono pokój', 'success')
             return redirect(url_for('main.room', room_code=new_room.code))
-            # return render_template('room.html', room=new_room)
     return render_template('home.html', rooms=current_user.rooms, current_user=current_user)
 
 
@@ -46,7 +46,7 @@ def room():
         stmt = select(room_user.c.aes_key).where(room_user.c.user_id == current_user.id, room_user.c.room_code == room.code)
         enc_aes_key = db.session.execute(stmt).scalar()
         messages = Message.query.filter_by(room_code=room.code).all()
-        return render_template('room.html', room=room, messages=messages, enc_aes_key=enc_aes_key)
+        return render_template('room.html', room=room, owner=room.owner, messages=messages, enc_aes_key=enc_aes_key)
     else:
         flash('Nie masz dostępu do tego pokoju lub nie istnieje taki pokoj', 'danger')
         return redirect(url_for('main.home'))

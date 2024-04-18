@@ -1,55 +1,59 @@
-{% extends 'base.html' %} {% block content %}
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="row m-2">
-                <p id="error" class="alert alert-{{ category }}">{{ message }}</p>
-            </div>
-        {% endfor %}
-    {% endif %}
-{% endwith %}
-<form method="post">
-    {{ form.hidden_tag() }}
-    <input type="hidden" id="publicKey" name="public_key">
-    <div class="row my-3">
-        {{ form.username.label(class="col-sm-2 col-form-label") }}
-        <div class="col-sm-10">
+{% extends 'base.html' %}
+{% block content %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="row m-2">
+                    <p id="error" class="alert alert-{{ category }}">{{ message }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <form method="post" class="col col-lg-4 offset-lg-4 mt-3 p-3">
+        {{ form.hidden_tag() }}
+        <input type="hidden" id="publicKey" name="public_key">
+        <div class="row my-3">
+            {{ form.username.label(class="form-label") }}
             {{ form.username(class="form-control") }}
         </div>
-    </div>
-    <div class="row mb-3">
-        {{ form.password.label(class="col-sm-2 col-form-label") }}
-        <div class="col-sm-10">
+        <div class="row mb-3">
+            {{ form.password.label(class="form-label") }}
             {{ form.password(class="form-control") }}
         </div>
-    </div>
-    <div class="row mb-3">
-        {{ form.confirm_password.label(class="col-sm-2 col-form-label") }}
-        <div class="col-sm-10">
+        <div class="row mb-3">
+            {{ form.confirm_password.label(class="form-label") }}
             {{ form.confirm_password(class="form-control") }}
         </div>
-    </div>
-    <div class="row">
-        <div class="col-sm-10 offset-sm-1">
-            <button type="button" id="submitButton" class="btn">
-                Prześlij
-            </button>
+        <div class="row mb-3">
+            <div class="col-sm-10 offset-sm-1">
+                <button type="button" id="submitButton" class="btn">
+                    Prześlij
+                </button>
+            </div>
         </div>
-    </div>
-</form>
+        <div class="row">
+            <p>Masz już konto? <a href="{{ url_for("auth.login") }}">Zaloguj</a> się.</p>
+        </div>
+    </form>
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/dataUtils.js') }}"></script>
     <script src="{{ url_for('static',filename='js/rsaKeyGen.js') }}"></script>
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
+            let error = $('#error');
             $('#submitButton').on('click', async function () {
-                console.log('generating key pair')
                 let username = $('#username').val();
-                let publicKey = await generateAndStoreKeyPair(username);
-                console.log('key pair generated')
-                $('#publicKey').val(publicKey);
-                $('form').submit();
+                $.get('/check_if_user_exists/' + username, async function (data) {
+                    if (data.exists) {
+                        error.text('Użytkownik o podanej nazwie już istnieje');
+                        error.show();
+                    } else {
+                        let publicKey = await generateAndStoreKeyPair(username);
+                        $('#publicKey').val(publicKey);
+                        $('form').submit();
+                    }
+                });
             });
         });
     </script>

@@ -1,11 +1,13 @@
 {% extends 'base.html' %} {% block content %}
-    <div class="row">
+    <div class="row my-2">
         <div class="col">
             <h1>Witaj w komunikatorze KapiThat</h1>
-            <h2>Aby zacząć używać komunikatora, musisz się zalogować</h2>
-            <a href="{{ url_for('auth.login') }}" class="btn">Zaloguj się</a>
-            <p>Jeżeli nie masz konta, zarejestruj sie</p>
-            <a href="{{ url_for('auth.register') }}" class="btn">Zarejestruj się</a>
+            <h2>Aby zacząć używać komunikatora, <a href="{{ url_for('auth.login') }}" class="btn">Zaloguj się</a></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h5>Jeżeli nie masz konta, <a href="{{ url_for('auth.register') }}" class="btn">Zarejestruj się</a></h5>
         </div>
     </div>
 {% endblock %}

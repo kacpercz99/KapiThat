@@ -1,27 +1,28 @@
-var socketio = io();
-var mediaRecorder;
-var chunks = [];
-var isRecording = false;
+let socketio = io();
+let mediaRecorder;
+let chunks = [];
+let isRecording = false;
+
 function formatTimestamp(timestamp) {
     let date = new Date(timestamp);
     let today = new Date();
 
     if (date.toDateString() === today.toDateString()) {
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     } else if (date.getFullYear() === today.getFullYear()) {
-        return date.toLocaleDateString([], { month: '2-digit', day: '2-digit' });
+        return date.toLocaleDateString([], {month: '2-digit', day: '2-digit'});
     } else {
         return date.getFullYear().toString();
     }
 }
 
 function createChatItem(message, sender, timestamp, isVoiceMessage = false) {
-    var messages = $("#messages");
-    var senderIsUser = currentUser === sender;
-    var content;
-    var justifyContent = senderIsUser ? "justify-content-end" : "justify-content-start";
-    var ownMessage = senderIsUser ? "self-message-item" : "peer-message-item";
-    var senderMsg = senderIsUser || sender === "" ? "" : `<strong>${sender}</strong><br>`;
+    let messages = $("#messages");
+    let senderIsUser = currentUser === sender;
+    let content;
+    let justifyContent = senderIsUser ? "justify-content-end" : "justify-content-start";
+    let ownMessage = senderIsUser ? "self-message-item" : "peer-message-item";
+    let senderMsg = senderIsUser || sender === "" ? "" : `<strong>${sender}</strong><br>`;
     if (isVoiceMessage) {
         content = `
                     <div class="row p-1 ${justifyContent}">
@@ -56,11 +57,10 @@ function createChatItem(message, sender, timestamp, isVoiceMessage = false) {
 }
 
 async function sendMessage() {
-    var msgInput = $("#message-input");
+    let msgInput = $("#message-input");
     if (msgInput.val() === "") return;
-    var msg = msgInput.val();
-    console.log("sending message: ", msg)
-    var encryptedMessage = await encryptMessage(msg);
+    let msg = msgInput.val();
+    let encryptedMessage = await encryptMessage(msg);
     socketio.emit("message", {message: encryptedMessage, is_voice_message: false});
     msgInput.val("");
 }
@@ -76,10 +76,11 @@ function toggleRecording() {
 function startRecording() {
     isRecording = true;
     $("#record-btn").text("Stop").css("background", "#dc3545");
+    $("#message-input").val("Recording...").attr("disabled", true);
+    $("#send-btn").attr("disabled", true);
     navigator.mediaDevices.getUserMedia({audio: true}).then(function (stream) {
         mediaRecorder = new MediaRecorder(stream);
         mediaRecorder.start();
-        console.log(mediaRecorder.state);
         mediaRecorder.ondataavailable = function (e) {
             chunks.push(e.data);
         };
@@ -88,20 +89,25 @@ function startRecording() {
 
 function stopRecording() {
     isRecording = false;
-    $("#record-btn").text("Record").css("background", "#6610f2")
-    mediaRecorder.stop();
-    mediaRecorder.onstop = function () {
-        var blob = new Blob(chunks, {type: 'audio/webm'});
-        chunks = [];
-        var reader = new FileReader();
-        reader.onloadend = async function () {
-            var base64data = reader.result;
-            var encryptedBase64Data = await encryptMessage(base64data);
-            socketio.emit("message", {message: encryptedBase64Data, is_voice_message: true});
+    $("#record-btn").text("Record").css("background", "#6610f2").attr("disabled", true)
+    setTimeout(() => {
+        mediaRecorder.stop();
+        mediaRecorder.onstop = function () {
+            let blob = new Blob(chunks, {type: 'audio/webm'});
+            chunks = [];
+            let reader = new FileReader();
+            reader.onloadend = async function () {
+                let base64data = reader.result;
+                let encryptedBase64Data = await encryptMessage(base64data);
+                socketio.emit("message", {message: encryptedBase64Data, is_voice_message: true});
+            };
+            reader.readAsDataURL(blob);
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
         };
-        reader.readAsDataURL(blob);
-        mediaRecorder.stream.getTracks().forEach(track => track.stop());
-    };
+        $("#record-btn").attr("disabled", false);
+        $("#message-input").val("").attr("disabled", false);
+        $("#send-btn").attr("disabled", false);
+    }, 100);
 }
 
 async function handleReceivedMessage(message) {
@@ -115,11 +121,11 @@ async function handleReceivedMessage(message) {
 }
 
 $(document).ready(function () {
-
-    $.get(`/get_messages/${roomCode}`, function(data){
-       data.messages.forEach(function(message){
-          handleReceivedMessage(message);
-       });
+    let input = $("#message-input");
+    $.get(`/get_messages/${roomCode}`, function (data) {
+        data.messages.forEach(function (message) {
+            handleReceivedMessage(message);
+        });
     });
 
     socketio.on("message", handleReceivedMessage);
@@ -138,14 +144,18 @@ $(document).ready(function () {
     );
     $("#messages").css("max-height", maxHeight);
 
-    $("#send-btn").on("click", function () {
-        sendMessage();
-    });
-
-    $("#message-input").keydown(function (event) {
+    input.keydown(function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
             sendMessage();
         }
+    });
+
+    input.keyup(function () {
+       if (input.val() === "" && !isRecording) {
+           $("#record-btn").attr("disabled", false);
+       } else {
+           $("#record-btn").attr("disabled", true);
+       }
     });
 });

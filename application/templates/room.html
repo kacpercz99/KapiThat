@@ -1,32 +1,39 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/room.css') }}">
+{% endblock %}
+{% block content %}
     <div class="row" id="room-info">
         <div class="col text-start">
             <h2>
-                Room: {{ room.name }}
+                Pokój: {{ room.name }}
             </h2>
             <a class="btn btn-danger mb-2 mt-2" href="{{ url_for('main.home') }}" id="leave-chat-btn">
-                Leave the room
+                Opuść pokój
             </a>
-            <button type="button" id="invite-user" class="btn" data-bs-toggle="modal" data-bs-targer="#inviteUserModal">
-                Invite a user
-            </button>
+            {% if current_user.username == room.owner %}
+                <button type="button" id="invite-user" class="btn" data-bs-toggle="modal"
+                        data-bs-targer="#inviteUserModal">
+                    Zaproś użytkownika
+                </button>
+            {% endif %}
             <div class="modal fade" id="inviteUserModal" tabindex="-1" aria-labelledby="inviteUserModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="inviteUserModalLabel">Invite a User</h5>
-                            <button type="button" id="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <h5 class="modal-title" id="inviteUserModalLabel">Zaproś użytkownika</h5>
+                            <button type="button" id="close-modal" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Zamknij"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="inviteUserForm">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Username</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                    <button type="button" id="search-btn" class="btn">Search</button>
-                                    <select id="user-list" class="form-select"></select>
-                                </div>
-                                <button type="button" id="invite-btn" class="btn">Invite</button>
+                            <form id="inviteUserForm" class="text-center">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="username" aria-label="Nick" name="username" required>
+                                        <button type="button" id="search-btn" class="btn">Szukaj</button>
+                                    </div>
+                                    <select id="user-list" class="form-select mb-3" aria-label="Znalezieni użytkownicy:" disabled></select>
+                                    <button type="button" id="invite-btn" class="btn" disabled>Zaproś</button>
                             </form>
                         </div>
                     </div>
@@ -34,7 +41,7 @@
             </div>
             <hr class="mb-2"/>
             <span>
-                Users: {% for user in room.members %} {{ user.username }} {% endfor %}
+                Użytkownicy: {% for user in room.members %} {{ user.username }} {% endfor %}
             </span>
             <hr class="mb-2">
         </div>
@@ -49,13 +56,13 @@
                         class="form-control"
                         type="text"
                         id="message-input"
-                        placeholder="Enter your message"
+                        placeholder="Wiadomość..."
                 />
-                <button class="btn" type="submit" id="send-btn" onclick="sendMessage()">
-                    Send
+                <button class="btn" type="button" id="send-btn" onclick="sendMessage()">
+                    Wyślij
                 </button>
                 <button class="btn" type="button" id="record-btn" onclick="toggleRecording()">
-                    Record
+                    Nagraj
                 </button>
             </div>
         </div>
@@ -73,7 +80,7 @@
     </script>
     <script src="{{ url_for('static', filename='js/aesUtils.js') }}"></script>
     <script type="text/javascript">
-        $(document).ready(async function() {
+        $(document).ready(async function () {
             aesKey = await decryptAESKey();
         });
     </script>

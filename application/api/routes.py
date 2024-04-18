@@ -1,6 +1,5 @@
 from datetime import datetime
 from flask_login import login_required, current_user
-from sqlalchemy import select
 
 from . import api
 from flask import request
@@ -33,7 +32,7 @@ def get_messages(room_code):
         } for message in messages]
         return {"messages": messages_data}
     else:
-        return {"error": "Brak dostepu"}, 403
+        return {"error": "Brak dostepu"}
 
 
 @api.route('/find_users/<string:username>', methods=['GET'])
@@ -54,7 +53,7 @@ def find_users(username):
 
 @api.route('/key/<int:user_id>', methods=['GET'])
 @login_required
-def get_key( user_id):
+def get_key(user_id):
     user = User.query.get(user_id)
     key = user.public_key
     return {"public_key": key}
@@ -68,6 +67,11 @@ def invite():
     room_name = request.json.get('room_name')
     sender_name = request.json.get('sender_name')
     aes_key = request.json.get('aes_key')
+
+    room = Room.query.filter_by(code=room_code).first()
+    if room.owner != current_user.username:
+        return {"error": "Nie jestes wlascicielem pokoju"}
+
     recipient = User.query.get(recipient_id)
     if recipient:
         if Invitation.query.filter_by(recipient_id=recipient_id, room_code=room_code).first():
@@ -83,6 +87,8 @@ def invite():
 @api.route('/invitations/<int:user_id>', methods=['GET'])
 @login_required
 def get_invitations(user_id):
+    if user_id != current_user.id:
+        return {"error": "Brak dostepu"}
     invitations = Invitation.query.filter_by(recipient_id=user_id).all()
     if len(invitations) == 0:
         return {"error": "Brak zaproszen"}
@@ -102,6 +108,8 @@ def get_invitations(user_id):
 def accept(invitation_id):
     invitation = Invitation.query.get(invitation_id)
     if invitation:
+        if invitation.recipient_id != current_user.id:
+            return {"error": "Brak dostepu"}
         user = User.query.get(invitation.recipient_id)
         room = Room.query.get(invitation.room_code)
         if user and room:
@@ -112,3 +120,12 @@ def accept(invitation_id):
             db.session.commit()
             return {"message": "Zaproszenie zaakceptowane"}
     return {"error": "Nie znaleziono zaproszenia"}
+
+
+@api.route('/check_if_user_exists/<string:username>', methods=['GET'])
+def check_if_user_exists(username):
+    if '/register' in request.referrer:
+        user = User.query.filter_by(username=username).first()
+        return {'exists': user is not None}
+    else:
+        return {'error': 'Invalid request source'}
