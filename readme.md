@@ -17,9 +17,9 @@
 |:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Musisz dostarczyć ważną parę certyfikatu i klucza poprzez pliki `cert.pem` i `key.pem` w katalogu `application/certs`. <br/>Bez ważnego certyfikatu i pary kluczy serwer nie może zapewnić bezpiecznego połączenia i nie można go uruchomić. |
 
-| :info: W przypadku braku certyfikatu i klucza                                                                                                                                                    |
-|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Możesz zmienić konfigurację na serwer http, ale niektóre funkcje takie jak nagrywanie głosu mogą nie działać poprawnie, a bezpieczeństwo danych przechodzących przez serwer może być zagrożone.  |
+| :information_source: W przypadku braku certyfikatu i klucza                                                                                                                                                               |
+|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Można na własną odpowiedzialność zmienić konfigurację na serwer http, ale niektóre funkcje takie jak nagrywanie głosu mogą nie działać poprawnie, a bezpieczeństwo danych przechodzących przez serwer może być zagrożone. |
 
 #### Uruchomienie serwera
 Natywnie wspierany tylko system Linux.<br/>
