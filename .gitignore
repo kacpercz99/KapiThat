@@ -2,4 +2,6 @@
 .env
 .idea/
 /instance/kapithat.db
-/application/templates/rsaaestest.html requirements txt from only used packages
+/application/templates/rsaaestest.html
+/application/certs/cert.pem
+/application/certs/key.pem

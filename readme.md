@@ -10,7 +10,7 @@
 
 #### Wymagania
 - [Python](https://www.python.org/downloads/)
-- Biblioteki z pliku `requirements.txt` - można je zainstalować za pomocą polecenia `pip install -r requirements.txt`
+- Biblioteki z pliku `requirements.txt` - można je zainstalować za pomocą polecenia <br/>`pip install -r requirements.txt`
 - Para certyfikatu i klucza w formacie PEM w katalogu `application/certs` (patrz poniżej)
 
 | :warning: Przed uruchomieniem                                                                                                                                                                                                                |
