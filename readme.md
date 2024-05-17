@@ -13,13 +13,11 @@
 - Biblioteki z pliku `requirements.txt` - można je zainstalować za pomocą polecenia <br/>`pip install -r requirements.txt`
 - Para certyfikatu i klucza w formacie PEM w katalogu `application/certs` (patrz poniżej)
 
-| :warning: Przed uruchomieniem                                                                                                                                                                                                                |
-|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Musisz dostarczyć ważną parę certyfikatu i klucza poprzez pliki `cert.pem` i `key.pem` w katalogu `application/certs`. <br/>Bez ważnego certyfikatu i pary kluczy serwer nie może zapewnić bezpiecznego połączenia i nie można go uruchomić. |
+[!IMPORTANT]                                                                                                                                                                                                             |
+Przed uruchomieniem musisz dostarczyć ważną parę certyfikatu i klucza poprzez pliki `cert.pem` i `key.pem` w katalogu `application/certs`. <br/>Bez ważnego certyfikatu i pary kluczy serwer nie może zapewnić bezpiecznego połączenia i nie można go uruchomić.
 
-| :information_source: W przypadku braku certyfikatu i klucza                                                                                                                                                               |
-|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Można na własną odpowiedzialność zmienić konfigurację na serwer http, ale niektóre funkcje takie jak nagrywanie głosu mogą nie działać poprawnie, a bezpieczeństwo danych przechodzących przez serwer może być zagrożone. |
+[!NOTE]                                                                                                                                                                                                                                                        |
+W przypadku braku certyfikatu i klucza można na własną odpowiedzialność zmienić konfigurację na serwer http, ale niektóre funkcje takie jak nagrywanie głosu mogą nie działać poprawnie, a bezpieczeństwo danych przechodzących przez serwer może być zagrożone.|
 
 #### Uruchomienie serwera
 Natywnie wspierany tylko system Linux.<br/>
