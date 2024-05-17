@@ -5,3 +5,4 @@
 /application/templates/rsaaestest.html
 /application/certs/cert.pem
 /application/certs/key.pem
+**/__pycache__/
