@@ -3,9 +3,10 @@
 CERT_DIR="./application/certs"
 CERT_FILE="${CERT_DIR}/cert.pem"
 KEY_FILE="${CERT_DIR}/key.pem"
+PORT=42068
 
 start_gunicorn() {
-  gunicorn -b 0.0.0.0:42068 -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 --certfile="$CERT_FILE" --keyfile="$KEY_FILE" run:app
+  gunicorn -b 0.0.0.0:$PORT -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 --certfile="$CERT_FILE" --keyfile="$KEY_FILE" run:app
 }
 
 if [[ -f "$CERT_FILE" && -f "$KEY_FILE" ]]; then

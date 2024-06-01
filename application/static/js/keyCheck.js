@@ -1,4 +1,4 @@
-async function check(username) {
+async function checkForKeys(username) {
     if (!await checkIfKeysExist(username)) {
         popupKeyImport(username);
     }
@@ -35,35 +35,14 @@ function checkIfKeysExist(username) {
         };
 
         openRequest.onerror = function(event) {
-            reject(new Error('Error opening database'));
+            reject("Błąd otwarcia bazy danych kluczy");
         };
     });
 }
 
 function popupKeyImport(username) {
-    let modal = document.createElement('div');
-    modal.id = 'popupModal';
-
-
-    let message = document.createElement('p');
-    message.textContent = 'Nie wykryto kluczy, musisz je zaimportować z innego urządzania, aby odszyfrować wiadmości.';
-    message.style.color = 'black';
-    modal.appendChild(message);
-    let qrCodeButton = document.createElement('button');
-    qrCodeButton.id = 'qrCodeButton';
-    qrCodeButton.classList.add('btn');
-    qrCodeButton.textContent = 'Zeskanuj kod QR';
-    $(qrCodeButton).click(function() {
-        importKeyFromQrCode(username, modal);
+    let modal = new bootstrap.Modal(document.getElementById('importKeysModal'), {
+        backdrop: 'static'
     });
-    modal.appendChild(qrCodeButton);
-    let fileButton = document.createElement('button');
-    fileButton.id = 'fileButton';
-    fileButton.classList.add('btn');
-    fileButton.textContent = 'Wybierz plik z kluczami';
-    $(fileButton).click(function() {
-        importKeyFromFile(username, modal);
-    });
-    modal.appendChild(fileButton);
-    document.body.appendChild(modal);
+    modal.show();
 }

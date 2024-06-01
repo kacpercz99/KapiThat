@@ -1,39 +1,21 @@
-function importKeyFromQrCode(username, modal) {
-    modal.removeChild(document.getElementById('qrCodeButton'));
-    modal.removeChild(document.getElementById('fileButton'));
-    let qrCode = document.createElement('video');
-    qrCode.id = 'qrCode';
-    modal.appendChild(qrCode);
-    modal.style.maxWidth = 600;
-    modal.style.maxHeight = 600;
-    import('./qr-scanner.min.js').then((module) => {
-        const QrScanner = module.default;
-        const scanner = new QrScanner(qrCode, result => console.log(result), {
-            highlightScanRegion: true,
-            highlightCodeOutline: true,
-        });
+async function importKeyFromFile(username) {
+    let fileInput = document.getElementById('keyFile');
+    let file = fileInput.files[0];
+    let fileContent = await file.text();
 
-        scanner.start().then(() => {
+    let keyPair = JSON.parse(decodeURIComponent(fileContent));
 
-            let closeButton = document.createElement('button');
-            closeButton.classList.add('btn');
-            closeButton.textContent = 'Zamknij';
-            $(closeButton).click(function() {
-                scanner.stop();
-            });
-            modal.appendChild(closeButton);
-        });
-    });
+    if(!keyPair.hasOwnProperty('privateKey') || !keyPair.hasOwnProperty('publicKey')) {
+        alert('Niepoprawny format pliku');
+        return;
+    }
+
+    saveKeyPair(username, keyPair);
+    location.reload();
 }
 
-function importKeyFromFile(username, modal) {
-    modal.removeChild(document.getElementById('qrCodeButton'));
-    modal.removeChild(document.getElementById('fileButton'));
+function saveKeyPair(username, keyPair) {
 
-}
-
-function saveKeyPair(username, keyPairJSON) {
-    let keyPair = JSON.parse(keyPairJSON);
     let dbRequest = indexedDB.open('keyDatabase', 1);
 
     dbRequest.onupgradeneeded = function (event) {

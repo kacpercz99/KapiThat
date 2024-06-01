@@ -4,10 +4,10 @@
 {% endblock %}
 {% block content %}
     {% if error %}
-    <div class="row mb-2">
-        <p id="error" class="alert alert-danger">{{ error }}</p>
-    </div>
-{% endif %}
+        <div class="row mb-2">
+            <p id="error" class="alert alert-danger">{{ error }}</p>
+        </div>
+    {% endif %}
     <div class="row mb-2">
         <h1 id="username">Witaj, {{ current_user.username }}</h1>
         <div class="dropdown-center">
@@ -22,7 +22,7 @@
                     </form>
                 </li>
                 <li>
-                    <button class="dropdown-item" id="exportBtn">Eksportuj klucze</button>
+                    <button class="dropdown-item" id="exportBtn" data-bs-toggle="modal" data-bs-target="#exportKeysModal">Eksportuj klucze</button>
                 </li>
             </ul>
         </div>
@@ -73,9 +73,49 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="invitationModalLabel">Zaproszenia</h5>
-                    <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Zamknij"><i class="fa-solid fa-xmark"></i></button>
+                    <button type="button" class="btn" data-bs-dismiss="modal" aria-label="Zamknij"><i
+                            class="fa-solid fa-xmark"></i></button>
                 </div>
                 <div class="modal-body list-group" id="invitation-list"></div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="importKeysModal" tabindex="-1" aria-labelledby="importKeysModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importKeysModalLabel">Import Kluczy</h5>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Aby móc używać serwisu, musisz zaimportować swoją parę kluczy z innego urządzenia.
+                    </p>
+                    <form id="importKeysForm" class="text-center">
+                        <input type="file" id="keyFile" class="form-control" accept=".txt" required>
+                        <br>
+                        <button type="button" id="importKeysBtn" class="btn" onclick="importKeyFromFile(username)">Importuj klucze</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exportKeysModal" tabindex="-1" aria-labelledby="exportKeysModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportKeysModalLabel">Export Kluczy</h5>
+                    <button type="button" id="close-modal" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                </div>
+                <div class="modal-body col">
+                    <p>
+                        Aby móc używać serwisu na innym urządzeniu, musisz wyeksportować swoją parę kluczy do innego urządzenia.
+                    </p>
+                    <form id="exportKeysForm" class="text-center">
+                        <button type="button" id="exportKeysBtn" class="btn" onclick="exportKeysToFile(username)">Eksportuj do pliku</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -147,7 +187,7 @@
                 console.log(username)
                 exportKeys(username);
             });
-            check(username);
+            checkForKeys(username);
 
             $('#create').click(async function () {
                 let room_name = $('#room_name').val();
@@ -158,7 +198,7 @@
                 }
             });
             checkInvitations();
-            setInterval(checkInvitations, 15000);
+            setInterval(checkInvitations, 5000);
         });
     </script>
 {% endblock %}

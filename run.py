@@ -1,5 +1,4 @@
 from application import init_app, socketio
-
 app = init_app()
 
 if __name__ == '__main__':
