@@ -42,6 +42,10 @@
                     <div class="card-footer">
                         <small class="text-muted"></small>
                         <a href="{{ url_for('main.room', room_code=room.code) }}" class="btn">Dołącz</a>
+                        <form method="post" style="display: inline">
+                            <input type="hidden" name="room_code" value="{{ room.code }}">
+                            <button type="submit" class="btn btn-danger" style="background: darkred"><i class="fa-solid fa-trash"></i></button>
+                        </form>
                     </div>
                 </div>
             </div>

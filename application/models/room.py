@@ -12,5 +12,5 @@ class Room(db.Model):
     code = db.Column(db.String(8), primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     owner = db.Column(db.String(50), nullable=False)
-    messages = db.relationship('Message', backref='room', lazy=True)
+    messages = db.relationship('Message', backref='room', cascade="all, delete", lazy=True)
     members = db.relationship('User', secondary=room_user, backref=db.backref('rooms', lazy=True))
