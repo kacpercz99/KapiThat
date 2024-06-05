@@ -113,7 +113,7 @@ def accept(invitation_id):
         user = User.query.get(invitation.recipient_id)
         room = Room.query.get(invitation.room_code)
         if user and room:
-            room.members.append(user)
+            # room.members.append(user)
             stmt = room_user.insert().values(user_id=user.id, room_code=invitation.room_code, aes_key=invitation.aes_key)
             db.session.delete(invitation)
             db.session.execute(stmt)
